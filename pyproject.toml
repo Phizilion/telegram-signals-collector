@@ -1,0 +1,18 @@
+[project]
+name = "telegram-signals-collector"
+version = "0.1.0"
+description = "Telegram Signal Collector backend and web UI"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.112",
+  "uvicorn[standard]>=0.30",
+  "pydantic-settings>=2.2",
+  "python-dotenv>=1.0",
+  "pyrogram>=2.0",
+  "SQLAlchemy>=2.0",
+  "langchain>=0.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
