@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+
+/* Mobile-first layout tweaks */
+.sidebar { width: 100%; }
+@media (min-width: 768px) {
+  .sidebar { width: 320px; }
+}
+
+.scroll-y { overflow-y: auto; }

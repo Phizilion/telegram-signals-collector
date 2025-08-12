@@ -1,0 +1,4 @@
+__pycache__/
+.env
+.pyrogram/
+node_modules/
