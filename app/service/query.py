@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 from sqlalchemy import select, func, case, Float
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..models import Channel, Signal, TradeSide
+from app.models import Channel, Signal, TradeSide
 
 
 async def list_channels_with_counts(session: AsyncSession) -> list[dict]:

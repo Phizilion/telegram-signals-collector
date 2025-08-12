@@ -5,8 +5,8 @@ from pathlib import Path
 from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.types import Message
-from .processor import Processor, MessageEnvelope
-from .config import settings
+from app.processor import Processor, MessageEnvelope
+from app.config import settings
 
 log = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from ..db import init_db
-from ..llm import LLMClient
-from ..processor import Processor
-from ..telegram_client import TelegramListener
-from ..config import settings
-from .routes import router
+from app.db import init_db
+from app.llm import LLMClient
+from app.processor import Processor
+from app.telegram_client import TelegramListener
+from app.config import settings
+from app.api.routes import router
 
 
 app = FastAPI(title="Telegram Signal Collector API", version="0.3.1")

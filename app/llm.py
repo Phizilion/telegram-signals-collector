@@ -3,8 +3,8 @@ import asyncio
 from typing import Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from .schemas import SignalFields
-from .config import settings
+from app.schemas import SignalFields
+from app.config import settings
 
 
 # System prompts kept tight and deterministic.

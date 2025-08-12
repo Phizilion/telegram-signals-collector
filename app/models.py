@@ -5,7 +5,7 @@ from sqlalchemy import (
     String, Integer, BigInteger, Boolean, DateTime, Text, JSON, Enum, UniqueConstraint, ForeignKey
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .db import Base
+from app.db import Base
 import enum
 
 

@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import Sequence, Any, Tuple, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..db import get_session
-from ..models import Signal, Channel
-from .schemas import ChannelItem, SymbolItem, SignalItem, ChannelStats, SymbolStats
-from ..service.query import (
+from app.db import get_session
+from app.models import Signal, Channel
+from app.api.schemas import ChannelItem, SymbolItem, SignalItem, ChannelStats, SymbolStats
+from app.service.query import (
     list_channels_with_counts,
     list_symbols_with_counts,
     get_signals_by_channel,
