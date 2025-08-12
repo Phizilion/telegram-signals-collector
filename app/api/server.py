@@ -13,14 +13,14 @@ app = FastAPI(title="Telegram Signal Collector API", version="0.3.1")
 
 # CORS: avoid '*' with credentials; restrict to dev origins
 app.add_middleware(
-  CORSMiddleware,
-  allow_origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-  ],
-  allow_credentials=True,
-  allow_methods=["*"],
-  allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(router)
@@ -32,19 +32,19 @@ _listener: TelegramListener | None = None
 
 @app.on_event("startup")
 async def on_startup() -> None:
-  global _llm, _processor, _listener
-  await init_db()
-  _llm = LLMClient()
-  _processor = Processor(llm=_llm, concurrency=settings.parser_concurrency)
-  await _processor.start()
-  _listener = TelegramListener(processor=_processor)
-  await _listener.start()
+    global _llm, _processor, _listener
+    await init_db()
+    _llm = LLMClient()
+    _processor = Processor(llm=_llm, concurrency=settings.parser_concurrency)
+    await _processor.start()
+    _listener = TelegramListener(processor=_processor)
+    await _listener.start()
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
-  global _processor, _listener
-  if _listener:
-    await _listener.stop()
-  if _processor:
-    await _processor.stop()
+    global _processor, _listener
+    if _listener:
+        await _listener.stop()
+    if _processor:
+        await _processor.stop()
