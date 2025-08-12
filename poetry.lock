@@ -607,6 +607,27 @@ files = [
 ]
 
 [[package]]
+name = "kurigram"
+version = "2.2.7"
+description = "Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "kurigram-2.2.7-py3-none-any.whl", hash = "sha256:3ebcfd4f4e7e6e9a2547997b8915ed323f679d9e99fde70a1f30f4c72aee0a97"},
+    {file = "kurigram-2.2.7.tar.gz", hash = "sha256:61f3529a0cdc0a0f10f8b98103c6509317d90ebc0ae69959f38a4b684ad244f8"},
+]
+
+[package.dependencies]
+pyaes = "<=1.6.1"
+pysocks = "<=1.7.1"
+
+[package.extras]
+dev = ["hatch (<=1.7.0)", "keyring (<=25.1.0)", "pytest (<=7.4.3)", "pytest-asyncio (<=0.21.1)", "pytest-cov (<=4.1.0)", "twine (<=4.0.2)"]
+docs = ["furo (<=2024.8.8)", "pygments (<=2.19.1)", "sphinx (<=8.2.3)", "sphinx-autobuild (<=2024.10.3)", "sphinx-copybutton (<=0.5.2)"]
+fast = ["tgcrypto (<=1.2.5)", "uvloop (<=0.21.0) ; sys_platform == \"darwin\" or sys_platform == \"linux\""]
+
+[[package]]
 name = "langchain-core"
 version = "0.3.74"
 description = "Building applications with LLMs through composability"
@@ -987,22 +1008,6 @@ azure-key-vault = ["azure-identity (>=1.16.0)", "azure-keyvault-secrets (>=4.8.0
 gcp-secret-manager = ["google-cloud-secret-manager (>=2.23.1)"]
 toml = ["tomli (>=2.0.1)"]
 yaml = ["pyyaml (>=6.0.1)"]
-
-[[package]]
-name = "pyrogram"
-version = "2.0.106"
-description = "Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots"
-optional = false
-python-versions = "~=3.7"
-groups = ["main"]
-files = [
-    {file = "Pyrogram-2.0.106-py3-none-any.whl", hash = "sha256:32b62b3d93030b1080cbe45b88c0e8790cf4e2179cf3321ede810d48edf97bc7"},
-    {file = "Pyrogram-2.0.106.tar.gz", hash = "sha256:30202995758fcb6e0f91224704ab7fedefea454297724bd70a6a71a23748c16f"},
-]
-
-[package.dependencies]
-pyaes = "1.6.1"
-pysocks = "1.7.1"
 
 [[package]]
 name = "pysocks"
@@ -1963,4 +1968,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "73ba13c2c727bc82dc0f761463b25d5a679837d51c73f1f7b94a0d54f7e001dc"
+content-hash = "2bbf86ba1d53b27a1f3f81db9335f05cc459a0d2c2e6bec17e26c8a28571c58a"
