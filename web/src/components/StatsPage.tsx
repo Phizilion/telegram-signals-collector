@@ -32,6 +32,12 @@ export default function StatsPage({ mode }: Props) {
               <th className="px-2 py-1 text-right">Mean Lev</th>
               <th className="px-2 py-1 text-right">/Day</th>
               <th className="px-2 py-1 text-right">/Week</th>
+              {mode === 'channels' && (
+                <>
+                  <th className="px-2 py-1 text-right text-red-700" title="Deleted">Deleted</th>
+                  <th className="px-2 py-1 text-right text-blue-700" title="Edited">Edited</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -47,6 +53,8 @@ export default function StatsPage({ mode }: Props) {
                 <td className="px-2 py-1 text-right">{r.mean_leverage?.toFixed(2) ?? '-'}</td>
                 <td className="px-2 py-1 text-right">{r.mean_per_day?.toFixed(3) ?? '-'}</td>
                 <td className="px-2 py-1 text-right">{r.mean_per_week?.toFixed(3) ?? '-'}</td>
+                {'deleted' in r && <td className="px-2 py-1 text-right text-red-700">{(r as ChannelStats).deleted}</td>}
+                {'edited' in r && <td className="px-2 py-1 text-right text-blue-700">{(r as ChannelStats).edited}</td>}
               </tr>
             ))}
           </tbody>

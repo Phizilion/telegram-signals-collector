@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Sequence, Any, Tuple, Optional
-from fastapi import APIRouter, Depends, Query
+from typing import Sequence, Any, Optional
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, delete
 from app.db import get_session
-from app.models import Signal, Channel
-from app.api.schemas import ChannelItem, SymbolItem, SignalItem, ChannelStats, SymbolStats
+from app.models import Signal, Channel, SignalEdition
+from app.api.schemas import ChannelItem, SymbolItem, SignalItem, ChannelStats, SymbolStats, EditionItem
 from app.service.query import (
     list_channels_with_counts,
     list_symbols_with_counts,
@@ -50,7 +51,6 @@ async def symbols_signals(
     offset: int = Query(0, ge=0),
     session: AsyncSession = Depends(get_session),
 ):
-    # Service returns a result set from a joined query (Signal, Channel)
     rows: Sequence[Any] = await get_signals_by_symbol(session, symbol, limit=limit, offset=offset)
 
     out: list[SignalItem] = []
@@ -58,7 +58,6 @@ async def symbols_signals(
         s: Optional[Signal] = None
         ch: Optional[Channel] = None
 
-        # SQLAlchemy 2.0 Row supports tuple-style indexing
         if hasattr(row, "__iter__") and not isinstance(row, Signal):
             try:
                 s = row[0]  # type: ignore[index]
@@ -67,11 +66,9 @@ async def symbols_signals(
                 pass
 
         if s is None:
-            # Fallback for legacy scalar rows
             s = row  # type: ignore[assignment]
 
         if ch is None:
-            # Ensure channel is present (avoids missing names in Symbols view)
             ch = await session.get(Channel, s.channel_id)
 
         out.append(_to_signal_item(s, ch))
@@ -88,6 +85,27 @@ async def symbols_stats(session: AsyncSession = Depends(get_session)):
     return await stats_by_symbol(session)
 
 
+@router.get("/signals/{signal_id}/editions", response_model=list[EditionItem])
+async def signal_editions(signal_id: int, session: AsyncSession = Depends(get_session)):
+    q = (
+        select(SignalEdition)
+        .where(SignalEdition.signal_id == signal_id)
+        .order_by(SignalEdition.edited_at.asc())
+    )
+    rows = (await session.execute(q)).scalars().all()
+    return [EditionItem(text=r.text, edited_at=r.edited_at) for r in rows]
+
+
+@router.delete("/signals/{signal_id}")
+async def delete_signal(signal_id: int, session: AsyncSession = Depends(get_session)):
+    s = await session.get(Signal, signal_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Signal not found")
+    await session.delete(s)
+    await session.commit()
+    return {"ok": True}
+
+
 # --- helpers ---
 
 def _to_signal_item(s: Signal, ch: Channel | None = None) -> SignalItem:
@@ -102,6 +120,8 @@ def _to_signal_item(s: Signal, ch: Channel | None = None) -> SignalItem:
         stop_loss=s.stop_loss,
         take_profits=s.take_profits,
         original_text=s.original_text,
+        deleted=bool(s.deleted),
+        edited=bool(s.edited),
         channel_title=(ch.title if ch else None),
         channel_username=(ch.username if ch else None),
     )

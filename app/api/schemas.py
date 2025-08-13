@@ -9,6 +9,8 @@ class ChannelItem(BaseModel):
     title: Optional[str]
     username: Optional[str]
     total: int
+    deleted: int = Field(0, description="Number of deleted signals in channel")
+    edited: int = Field(0, description="Number of edited signals in channel")
 
 
 class SymbolItem(BaseModel):
@@ -27,7 +29,11 @@ class SignalItem(BaseModel):
     stop_loss: Optional[list[float]] = None
     take_profits: list[float]
     original_text: str
-    # NEW: include channel info (used on Symbols page)
+
+    deleted: bool = False
+    edited: bool = False
+
+    # Optional channel info for symbols view
     channel_title: Optional[str] = None
     channel_username: Optional[str] = None
 
@@ -43,6 +49,8 @@ class ChannelStats(BaseModel):
     mean_leverage: Optional[float]
     mean_per_day: Optional[float]
     mean_per_week: Optional[float]
+    deleted: int
+    edited: int
 
 
 class SymbolStats(BaseModel):
@@ -54,3 +62,8 @@ class SymbolStats(BaseModel):
     mean_leverage: Optional[float]
     mean_per_day: Optional[float]
     mean_per_week: Optional[float]
+
+
+class EditionItem(BaseModel):
+    text: str
+    edited_at: datetime

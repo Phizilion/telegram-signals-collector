@@ -17,6 +17,9 @@ export default function Sidebar({ mode, items, selected, onSelect }: Props) {
           const label = 'symbol' in it ? it.symbol : (it.title || it.username || it.id)
           const total = it.total
           const active = selected === key
+          const deleted = 'deleted' in it ? (it as ChannelItem).deleted : undefined
+          const edited = 'edited' in it ? (it as ChannelItem).edited : undefined
+
           return (
             <li key={String(key)}>
               <button
@@ -25,7 +28,15 @@ export default function Sidebar({ mode, items, selected, onSelect }: Props) {
               >
                 <div className="flex items-center justify-between">
                   <span className="truncate text-sm">{label}</span>
-                  <span className="text-xs text-neutral-600">{total}</span>
+                  <span className="text-xs text-neutral-600 flex items-center gap-2">
+                    {mode === 'channels' && deleted !== undefined && edited !== undefined && (
+                      <>
+                        <span className="text-red-600" title="deleted">{deleted}</span>
+                        <span className="text-blue-600" title="edited">{edited}</span>
+                      </>
+                    )}
+                    <span>{total}</span>
+                  </span>
                 </div>
               </button>
             </li>

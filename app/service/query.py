@@ -1,17 +1,22 @@
 from __future__ import annotations
 from datetime import datetime
-from sqlalchemy import select, func, case, Float
+from sqlalchemy import select, func, case, Float, literal
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Channel, Signal, TradeSide
+from app.models import Channel, Signal, TradeSide, SignalEdition
 
 
 async def list_channels_with_counts(session: AsyncSession) -> list[dict]:
+    deleted_case = case((Signal.deleted.is_(True), 1), else_=0)
+    edited_case = case((Signal.edited.is_(True), 1), else_=0)
+
     q = (
         select(
             Channel.id,
             Channel.title,
             Channel.username,
-            func.count(Signal.id).label("total")
+            func.count(Signal.id).label("total"),
+            func.sum(deleted_case).label("deleted"),
+            func.sum(edited_case).label("edited"),
         )
         .join(Signal, Signal.channel_id == Channel.id, isouter=True)
         .group_by(Channel.id)
@@ -19,7 +24,14 @@ async def list_channels_with_counts(session: AsyncSession) -> list[dict]:
     )
     rows = (await session.execute(q)).all()
     return [
-        {"id": r.id, "title": r.title, "username": r.username, "total": int(r.total or 0)}
+        {
+            "id": r.id,
+            "title": r.title,
+            "username": r.username,
+            "total": int(r.total or 0),
+            "deleted": int(r.deleted or 0),
+            "edited": int(r.edited or 0),
+        }
         for r in rows
     ]
 
@@ -53,9 +65,9 @@ async def get_signals_by_symbol(
     symbol: str,
     limit: int = 100,
     offset: int = 0
-) -> list[tuple[Signal, Channel]]:
+):
     """
-    Return signals for a symbol **joined with Channel** to avoid N+1 queries.
+    Return signals for a symbol joined with Channel to avoid N+1.
     """
     q = (
         select(Signal, Channel)
@@ -71,6 +83,8 @@ async def get_signals_by_symbol(
 async def stats_by_channel(session: AsyncSession) -> list[dict]:
     long_case = case((Signal.side == TradeSide.long, 1), else_=0)
     short_case = case((Signal.side == TradeSide.short, 1), else_=0)
+    deleted_case = case((Signal.deleted.is_(True), 1), else_=0)
+    edited_case = case((Signal.edited.is_(True), 1), else_=0)
 
     # average per week (calendar weeks) per channel using SQLite strftime('%Y-%W')
     weekly_counts = (
@@ -102,6 +116,8 @@ async def stats_by_channel(session: AsyncSession) -> list[dict]:
             func.min(Signal.message_date).label("first_dt"),
             func.max(Signal.message_date).label("last_dt"),
             avg_weekly.c.avg_per_week,
+            func.sum(deleted_case).label("deleted"),
+            func.sum(edited_case).label("edited"),
         )
         .join(Signal, Signal.channel_id == Channel.id, isouter=True)
         .join(avg_weekly, avg_weekly.c.channel_id == Channel.id, isouter=True)
@@ -131,6 +147,8 @@ async def stats_by_channel(session: AsyncSession) -> list[dict]:
             "mean_leverage": float(r.mean_leverage) if r.mean_leverage is not None else None,
             "mean_per_day": per_day,
             "mean_per_week": round(per_week, 6) if per_week is not None else None,
+            "deleted": int(r.deleted or 0),
+            "edited": int(r.edited or 0),
         })
     return out
 
