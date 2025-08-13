@@ -11,7 +11,6 @@ Collects **real-time** trading signals from Telegram channels you are subscribed
 ### First-time Telegram login
 
 1) Set `API_ID` and `API_HASH` in `.env`.
-2) (Optional) Set `TELEGRAM_PHONE` (and `TELEGRAM_PASSWORD` if 2FA) to avoid some prompts.
 3) Run:
 
 ```bash
@@ -22,7 +21,6 @@ python -m app.login
 1. `python -m venv .venv && source .venv/bin/activate`
 2. `pip install -r requirements.txt`
 3. Fill `.env` from `.env.example`.
-   - Create a Pyrogram session string (login once) and set `SESSION_STRING`.
    - Set `OPENAI_API_KEY` and `OPENAI_MODEL` (default `gpt-4o-mini`).
 4. Run: `python -m app.main`
 
