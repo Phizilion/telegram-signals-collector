@@ -1,12 +1,11 @@
 # Telegram Signal Collector
 
 Collect **new** trading signals from Telegram channels you’re subscribed to. Uses **Pyrogram** to receive channel messages, **LangChain + OpenAI** to classify/parse, and **SQLAlchemy** to persist to **SQLite**.  
-Pipeline is **simple and direct**: each message is processed inline — **no queues**, **no rate limits**.
 
 ## Highlights
 - No history scraping; only **new messages** as they arrive.
 - LLM **classification** + **structured parsing** (Pydantic model).
-- Minimal valid signal: `symbol`, `side`, `take_profits`.
+- Minimal valid signal: `symbol`, `side`.
 - JSON arrays for `take_profits` / `stop_loss`.
 - API endpoints (FastAPI) + lightweight React viewer.
 
@@ -18,7 +17,7 @@ Pipeline is **simple and direct**: each message is processed inline — **no que
    ```bash
    python -m app.login
    ```
-   Follow the interactive login. A session file is created at `${TELEGRAM_SESSION_DIR}/${TELEGRAM_SESSION_NAME}.session`.
+   Follow the interactive login. A session file is created at `$.pyrogram/signals.session` (by default).
 
 ## Running (API + Collector)
 Use Python 3.13.
@@ -52,7 +51,7 @@ See `.env.example`. Key values:
 - Uniqueness: `(channel_id, message_id)` prevents duplicates
 - UTC times
 
-## API (selected)
+## API
 - `GET /api/health`
 - `GET /api/channels`
 - `GET /api/symbols`
@@ -65,5 +64,3 @@ See `.env.example`. Key values:
 - A small regex **gate** quickly filters obvious noise; LLM still makes final decision + structured parse.
 - Handle message edits by wiring Pyrogram’s edit handler and updating by `(channel_id, message_id)`.
 - Swap `ChatOpenAI` for another `BaseLanguageModel` if needed.
-
-> Design choice: We intentionally removed the async queue and any concurrency semaphores. Processing is inline per-message for simplicity and lower latency. If you later need throttling/backpressure, reintroduce a queue/sem at the integration boundary.

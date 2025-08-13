@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "telegram-signal-collector"
-version = "0.3.1"
+version = "0.3.0"
 description = "Real-time Telegram trading signal collector + FastAPI + React viewer"
 authors = ["Phizilion <Phizilion@users.noreply.github.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
-pyrogram = "^2.0.106"
+kurigram = "^2.0"
 tgcrypto = "^1.2.5"
 pydantic = "^2.7"
 pydantic-settings = "^2.2"

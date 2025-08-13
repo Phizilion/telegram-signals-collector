@@ -28,7 +28,8 @@ class LLMClient:
             api_key=settings.openai_api_key,
             temperature=0,
             max_tokens=400,
-            timeout=30,
+            timeout=120,
+            max_retries=5
         )
 
         self._cls_prompt = ChatPromptTemplate.from_messages(
