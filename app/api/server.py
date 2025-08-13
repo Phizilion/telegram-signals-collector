@@ -1,7 +1,6 @@
 from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.db import init_db
 from app.llm import LLMClient
 from app.processor import Processor
 from app.telegram_client import TelegramListener
@@ -32,7 +31,6 @@ _checker: MessageChecker | None = None
 @app.on_event("startup")
 async def on_startup() -> None:
     global _llm, _processor, _listener, _checker
-    await init_db()
     _llm = LLMClient()
     _processor = Processor(llm=_llm)
     _listener = TelegramListener(processor=_processor)

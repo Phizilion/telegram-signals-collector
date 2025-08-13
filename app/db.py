@@ -24,12 +24,6 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def init_db() -> None:
-    """Create tables if they don't exist."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
 # FastAPI dependency – plain async function that yields the session (NOT a contextmanager)
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with AsyncSessionLocal() as session:
