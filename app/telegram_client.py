@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 import logging
 from pathlib import Path
 from pyrogram import Client, filters
@@ -12,12 +11,10 @@ log = logging.getLogger(__name__)
 
 
 class TelegramListener:
-    """Wire Pyrogram events to the processing pipeline."""
+    """Wire Pyrogram events to the processing pipeline (inline, no queue)."""
 
     def __init__(self, processor: Processor) -> None:
         self.processor = processor
-
-        # Ensure session dir exists
         Path(settings.session_dir).mkdir(parents=True, exist_ok=True)
         self._session_path = Path(settings.session_dir) / f"{settings.session_name}.session"
 
@@ -30,15 +27,12 @@ class TelegramListener:
         )
 
     async def start(self) -> None:
-        # Do not block FastAPI startup with interactive login; instruct user to run app.login
         if not self._session_path.exists():
             raise RuntimeError(
                 f"Telegram session not found at '{self._session_path}'. Run `python -m app.login` to sign in."
             )
 
-        # Register handler once client exists
         self.client.add_handler(MessageHandler(self._on_channel_message, filters.channel))
-
         await self.client.start()
         log.info("pyrogram client started (session: %s)", self._session_path)
 
@@ -62,7 +56,5 @@ class TelegramListener:
             text=text,
         )
 
-        try:
-            await self.processor.submit(env)
-        except asyncio.QueueFull:
-            log.warning("processor queue full; dropping message ch=%s msg=%s", env.channel_id, env.message_id)
+        # Process inline (no queue/backpressure)
+        await self.processor.process(env)

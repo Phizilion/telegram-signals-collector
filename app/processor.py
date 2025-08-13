@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Optional
@@ -18,12 +17,19 @@ class MessageEnvelope:
     """Container for Telegram message attributes we rely on."""
     __slots__ = ("channel_id", "channel_title", "channel_username", "message_id", "message_date", "text")
 
-    def __init__(self, channel_id: int, channel_title: Optional[str], channel_username: Optional[str], message_id: int, message_date: datetime, text: str) -> None:
+    def __init__(
+        self,
+        channel_id: int,
+        channel_title: Optional[str],
+        channel_username: Optional[str],
+        message_id: int,
+        message_date: datetime,
+        text: str,
+    ) -> None:
         self.channel_id = channel_id
         self.channel_title = channel_title
         self.channel_username = channel_username
         self.message_id = message_id
-        # normalize to UTC aware
         if message_date.tzinfo is None:
             message_date = message_date.replace(tzinfo=timezone.utc)
         self.message_date = message_date.astimezone(timezone.utc)
@@ -31,49 +37,17 @@ class MessageEnvelope:
 
 
 class Processor:
-    """Pipeline: heuristics -> LLM classify -> LLM parse -> persist."""
+    """Inline pipeline (no queue): heuristics -> LLM classify -> LLM parse -> persist."""
 
-    def __init__(self, llm: LLMClient, concurrency: int = 2, max_queue: int = 1000) -> None:
+    def __init__(self, llm: LLMClient) -> None:
         self.llm = llm
-        self.queue: asyncio.Queue[MessageEnvelope] = asyncio.Queue(maxsize=max_queue)
-        self._workers: list[asyncio.Task] = []
-        self._stop = asyncio.Event()
-        self._concurrency = concurrency
 
-    async def start(self) -> None:
-        for i in range(self._concurrency):
-            self._workers.append(asyncio.create_task(self._worker(i), name=f"worker-{i}"))
-
-    async def stop(self) -> None:
-        self._stop.set()
-        for w in self._workers:
-            w.cancel()
-        await asyncio.gather(*self._workers, return_exceptions=True)
-
-    async def submit(self, env: MessageEnvelope) -> None:
-        await self.queue.put(env)
-
-    async def _worker(self, idx: int) -> None:
-        log.info("processor worker %s started", idx)
-        while not self._stop.is_set():
-            try:
-                env = await self.queue.get()
-                await self._process(env)
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                log.exception("processing error: %s", e)
-            finally:
-                self.queue.task_done()
-
-    async def _process(self, env: MessageEnvelope) -> None:
+    async def process(self, env: MessageEnvelope) -> None:
         text = env.text.strip()
         if not text:
             return
 
-        # Heuristic gate reduces LLM traffic while preserving LLM decision.
         likely = looks_like_signal(text)
-
         is_sig = likely or await self.llm.is_signal(text)
         if not is_sig:
             log.debug("not a signal: channel=%s msg=%s", env.channel_id, env.message_id)
@@ -102,7 +76,7 @@ class Processor:
                     session.add(ch)
                     await session.commit()
                     return
-                # update sparse info we might have learned
+
                 updated = False
                 if env.channel_title and existing.title != env.channel_title:
                     existing.title = env.channel_title
@@ -110,7 +84,9 @@ class Processor:
                 if env.channel_username and existing.username != env.channel_username:
                     existing.username = env.channel_username
                     updated = True
-                if last_message_id and (not existing.last_message_id or last_message_id > existing.last_message_id):
+                if last_message_id and (
+                    not existing.last_message_id or last_message_id > existing.last_message_id
+                ):
                     existing.last_message_id = last_message_id
                     updated = True
                 if updated:
@@ -150,7 +126,7 @@ class Processor:
                 )
             except IntegrityError:
                 await session.rollback()
-                # Duplicate message in same channel; ignore gracefully.
+                # Duplicate message in same channel; ignore.
             except Exception:
                 await session.rollback()
                 raise

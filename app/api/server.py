@@ -5,13 +5,10 @@ from app.db import init_db
 from app.llm import LLMClient
 from app.processor import Processor
 from app.telegram_client import TelegramListener
-from app.config import settings
 from app.api.routes import router
-
 
 app = FastAPI(title="Telegram Signal Collector API", version="0.3.1")
 
-# CORS: avoid '*' with credentials; restrict to dev origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -35,16 +32,13 @@ async def on_startup() -> None:
     global _llm, _processor, _listener
     await init_db()
     _llm = LLMClient()
-    _processor = Processor(llm=_llm, concurrency=settings.parser_concurrency)
-    await _processor.start()
+    _processor = Processor(llm=_llm)
     _listener = TelegramListener(processor=_processor)
     await _listener.start()
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
-    global _processor, _listener
+    global _listener
     if _listener:
         await _listener.stop()
-    if _processor:
-        await _processor.stop()
