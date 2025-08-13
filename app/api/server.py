@@ -37,7 +37,7 @@ async def on_startup() -> None:
     await _listener.start()
 
     # Start periodic deletion/edition checker (every 30 minutes)
-    _checker = MessageChecker(client=_listener.client, interval_minutes=30)
+    _checker = MessageChecker(client=_listener.client, interval_seconds=1800)
     await _checker.start()
 
 

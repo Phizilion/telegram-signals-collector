@@ -24,9 +24,9 @@ class MessageChecker:
     Every 30 minutes the loop selects candidates by last_checked_time and processes them.
     """
 
-    def __init__(self, client: Client, interval_minutes: int = 30) -> None:
+    def __init__(self, client: Client, interval_seconds: int = 1800) -> None:
         self.client = client
-        self.interval = max(1, interval_minutes)
+        self.interval = max(5, interval_seconds)
         self._task: asyncio.Task | None = None
         self._stop = asyncio.Event()
 
@@ -46,7 +46,7 @@ class MessageChecker:
             self._task = None
 
     async def _runner(self) -> None:
-        log.info("message checker started (interval=%s min)", self.interval)
+        log.info("message checker started (interval=%s sec)", self.interval)
         while not self._stop.is_set():
             try:
                 await self._cycle()
@@ -54,7 +54,7 @@ class MessageChecker:
                 break
             except Exception:
                 log.exception("message checker cycle failed")
-            await asyncio.wait([self._stop.wait()], timeout=self.interval * 60)
+            await asyncio.wait([self._stop.wait()], timeout=self.interval)
 
     async def _cycle(self) -> None:
         now = datetime.now(timezone.utc)
