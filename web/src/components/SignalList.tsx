@@ -80,7 +80,7 @@ function Row({ s, showChannel, onDeleted }: RowProps) {
       )}
 
       <div className="mt-2 text-sm">
-        <div>TP: {s.take_profits.join(', ')}</div>
+        {s.take_profits && <div>TP: {s.take_profits.join(', ')}</div>}
         {s.stop_loss && <div>SL: {s.stop_loss.join(', ')}</div>}
         {typeof s.leverage === 'number' && <div>Leverage: {s.leverage}x</div>}
       </div>

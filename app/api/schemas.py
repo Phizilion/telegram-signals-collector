@@ -27,7 +27,7 @@ class SignalItem(BaseModel):
     side: Literal["long", "short"]
     leverage: Optional[int] = None
     stop_loss: Optional[list[float]] = None
-    take_profits: list[float]
+    take_profits: Optional[list[float]] = None
     original_text: str
 
     deleted: bool = False

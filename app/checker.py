@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import AsyncSessionLocal
 from app.models import Signal, SignalEdition
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("sc.checker")
 
 
 class MessageChecker:

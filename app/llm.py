@@ -1,9 +1,13 @@
 from __future__ import annotations
+
+import logging
 from typing import Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.schemas import SignalFields
 from app.config import settings
+
+log = logging.getLogger("sc.llm")
 
 # System prompts kept tight and deterministic.
 _SIGNAL_CLASSIFIER_SYSTEM = (
@@ -44,6 +48,7 @@ class LLMClient:
     async def is_signal(self, text: str) -> bool:
         prompt = self._cls_prompt.format_messages(message=text)
         resp = await self.llm.ainvoke(prompt)
+        log.debug("LLM response '%s' for text %s", resp.content[:100], text[:100])
         content = (resp.content or "").strip().lower()
         return content.startswith("y")  # yes/no only
 
@@ -51,8 +56,11 @@ class LLMClient:
         prompt = self._parse_prompt.format_messages(message=text)
         try:
             result: SignalFields = await self._structured_llm.ainvoke(prompt)
-            if not result.symbol or not result.take_profits or not result.side:
+            log.debug("Parsed signal with LLM: %s", str(result).replace("\n", " "))
+            if not result.symbol or not result.side:
+                log.warning("Signal without symbol or side parsed: %s", result)
                 return None
             return result
-        except Exception:
+        except Exception as e:
+            log.exception("Unexpected exception during signal parsing", exc_info=e)
             return None
