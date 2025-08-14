@@ -10,7 +10,7 @@ from app.schemas import SignalFields, PersistedSignal
 from app.regex_gate import looks_like_signal
 from app.llm import LLMClient
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("sc.processor")
 
 
 class MessageEnvelope:

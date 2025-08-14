@@ -21,6 +21,7 @@ openai = "^1.40.0"
 python-dotenv = "^1.0.1"
 fastapi = "^0.112.0"
 uvicorn = {version = "^0.30.0", extras = ["standard"]}
+python_dotenv = "^1.1.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.5"

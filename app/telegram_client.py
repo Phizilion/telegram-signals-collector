@@ -7,7 +7,7 @@ from pyrogram.types import Message
 from app.processor import Processor, MessageEnvelope
 from app.config import settings
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("sc.telegram")
 
 
 class TelegramListener:

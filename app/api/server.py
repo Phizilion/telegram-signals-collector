@@ -6,11 +6,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.llm import LLMClient
+from app.log import setup_logging
 from app.processor import Processor
 from app.telegram_client import TelegramListener
 from app.api.routes import router
 from app.checker import MessageChecker
 
+setup_logging()
 log = logging.getLogger("sc.api")
 
 app = FastAPI(title="Telegram Signal Collector API", version="0.3.2")
